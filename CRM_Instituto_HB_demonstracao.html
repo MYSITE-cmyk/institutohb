@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Instituto HB · Gestão de Leads (demonstração)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --petroleo:#0F4C5C;
+    --petroleo-dark:#0A3540;
+    --ambar:#E8A100;
+    --ambar-soft:#FBE4B0;
+    --cream:#FBF7EF;
+    --paper:#FFFFFF;
+    --coral:#C1502E;
+    --coral-soft:#F5DCD1;
+    --sage:#5E8467;
+    --sage-soft:#DCE8DE;
+    --ink:#1F2A2E;
+    --ink-soft:#5A6A6E;
+    --mist:#E7EDE9;
+    --mist-line:#D8E1DC;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--cream);
+    font-family:'Inter',sans-serif;
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:1180px;margin:0 auto;padding:28px 24px 60px;}
+
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    padding-bottom:18px;
+    border-bottom:2px solid var(--petroleo);
+    margin-bottom:26px;
+    flex-wrap:wrap;
+    gap:14px;
+  }
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    letter-spacing:.12em;
+    text-transform:uppercase;
+    color:var(--ambar);
+    background:var(--petroleo);
+    display:inline-block;
+    padding:3px 9px;
+    border-radius:3px;
+    margin-bottom:8px;
+  }
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:34px;
+    margin:0;
+    color:var(--petroleo);
+    letter-spacing:-.01em;
+  }
+  .today{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:12px;
+    color:var(--ink-soft);
+    text-align:right;
+  }
+  .settings-btn{
+    background:none;
+    border:1px solid var(--mist-line);
+    color:var(--ink-soft);
+    font-family:'Inter',sans-serif;
+    font-size:12px;
+    padding:7px 12px;
+    border-radius:20px;
+    cursor:pointer;
+    margin-top:6px;
+    transition:.15s;
+  }
+  .settings-btn:hover{border-color:var(--petroleo);color:var(--petroleo);}
+
+  .alerts{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:14px;
+    margin-bottom:26px;
+  }  .alert-card{
+    position:relative;
+    background:var(--paper);
+    border:1px solid var(--mist-line);
+    border-radius:4px 4px 4px 18px;
+    padding:16px 18px;
+    cursor:pointer;
+    transition:.15s;
+    overflow:hidden;
+  }
+  .alert-card::before{
+    content:'';
+    position:absolute;
+    top:0;left:0;
+    width:5px;height:100%;
+    background:var(--card-accent,var(--petroleo));
+  }
+  .alert-card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(15,76,92,.08);}
+  .alert-card.active-filter{outline:2px solid var(--card-accent,var(--petroleo));}
+  .alert-count{
+    font-family:'Fraunces',serif;
+    font-size:32px;
+    font-weight:600;
+    color:var(--card-accent,var(--petroleo));
+    line-height:1;
+  }
+  .alert-label{
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin-top:6px;
+    font-weight:500;
+  }
+  .alert-card[data-type="retorno"]{--card-accent:var(--coral);}
+  .alert-card[data-type="aniversario"]{--card-accent:var(--ambar);}
+  .alert-card[data-type="prazo"]{--card-accent:var(--petroleo);}
+
+  /* DASHBOARD */
+  #dashboardPanel{
+    display:none;
+    background:var(--paper);
+    border:1px solid var(--mist-line);
+    border-radius:6px;
+    padding:22px 22px 8px;
+    margin-bottom:26px;
+  }
+  #dashboardPanel.open{display:block;}
+  .dash-title{
+    font-family:'Fraunces',serif;
+    font-size:18px;
+    color:var(--petroleo);
+    margin:0 0 16px;
+  }
+  .dash-stats{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+    gap:14px;
+    margin-bottom:22px;
+  }
+  .dash-stat{
+    background:var(--cream);
+    border-radius:6px;
+    padding:14px 16px;
+  }
+  .dash-stat .num{
+    font-family:'Fraunces',serif;
+    font-size:26px;
+    font-weight:600;
+    color:var(--petroleo);
+    line-height:1;
+  }
+  .dash-stat .lbl{
+    font-size:11.5px;
+    color:var(--ink-soft);
+    margin-top:5px;
+  }
+  .dash-row{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:24px;
+    margin-bottom:20px;
+  }
+  .dash-block-title{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--ink-soft);
+    margin-bottom:10px;
+  }
+  .bar-row{
+    display:flex;align-items:center;gap:10px;
+    margin-bottom:9px;font-size:12.5px;
+  }
+  .bar-label{width:100px;flex-shrink:0;color:var(--ink-soft);}
+  .bar-track{
+    flex:1;background:var(--mist);border-radius:20px;
+    height:9px;overflow:hidden;
+  }
+  .bar-fill{height:100%;border-radius:20px;transition:width .3s;}
+  .bar-value{width:28px;text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11.5px;color:var(--ink);}
+  @media (max-width:700px){
+    .dash-row{grid-template-columns:1fr;}
+  }
+
+  .toolbar{
+    display:flex;
+    gap:10px;
+    flex-wrap:wrap;
+    align-items:center;
+    margin-bottom:16px;
+  }
+  .toolbar input[type="text"], .toolbar select{
+    font-family:'Inter',sans-serif;
+    font-size:13.5px;
+    padding:9px 12px;
+    border:1px solid var(--mist-line);
+    border-radius:6px;
+    background:var(--paper);
+    color:var(--ink);
+  }
+  .toolbar input[type="text"]{flex:1;min-width:180px;}
+  .btn-primary{
+    background:var(--petroleo);
+    color:#fff;
+    border:none;
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    font-size:13.5px;
+    padding:10px 18px;
+    border-radius:6px;
+    cursor:pointer;
+    transition:.15s;
+    white-space:nowrap;
+  }
+  .btn-primary:hover{background:var(--petroleo-dark);}
+  .clear-filter{
+    font-size:12px;
+    color:var(--coral);
+    background:none;
+    border:none;
+    cursor:pointer;
+    text-decoration:underline;
+    padding:0;
+  }
+
+  .table-wrap{
+    background:var(--paper);
+    border:1px solid var(--mist-line);
+    border-radius:6px;
+    overflow:hidden;
+  }
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{
+    background:var(--petroleo);
+    color:var(--ambar-soft);
+    font-family:'IBM Plex Mono',monospace;
+    font-size:10.5px;
+    letter-spacing:.06em;
+    text-transform:uppercase;
+    text-align:left;
+    padding:12px 10px;
+    font-weight:500;
+    white-space:nowrap;
+  }
+  tbody tr{border-bottom:1px solid var(--mist);}
+  tbody tr:last-child{border-bottom:none;}
+  tbody tr:hover{background:var(--cream);}
+  tbody td{padding:11px 10px;vertical-align:middle;color:var(--ink);}
+  .name-cell{font-weight:600;}
+  .sub{font-size:11.5px;color:var(--ink-soft);}
+  .badge{
+    display:inline-block;
+    font-size:10.5px;
+    font-weight:600;
+    padding:3px 9px;
+    border-radius:20px;
+    font-family:'Inter',sans-serif;
+    white-space:nowrap;
+  }
+  .badge-novo{background:var(--mist);color:var(--ink-soft);}
+  .badge-andamento{background:var(--ambar-soft);color:#8a6300;}
+  .badge-matriculado{background:var(--sage-soft);color:var(--sage);}
+  .badge-perdido{background:var(--coral-soft);color:var(--coral);}
+  .flag{
+    display:inline-block;
+    width:8px;height:8px;
+    border-radius:50%;
+    margin-right:5px;
+  }
+  .flag-retorno{background:var(--coral);}
+  .flag-aniversario{background:var(--ambar);}
+  .flag-prazo{background:var(--petroleo);}
+  .row-actions button{
+    background:none;border:none;cursor:pointer;
+    font-size:12px;color:var(--ink-soft);margin-right:8px;
+    font-family:'Inter',sans-serif;
+  }
+  .row-actions button:hover{color:var(--petroleo);text-decoration:underline;}
+  .empty-state{
+    text-align:center;
+    padding:60px 20px;
+    color:var(--ink-soft);
+  }
+  .empty-state .eyebrow{margin-bottom:14px;}
+  .empty-state h3{font-family:'Fraunces',serif;color:var(--petroleo);font-size:20px;margin:0 0 6px;}
+
+  .modal-overlay{
+    display:none;
+    position:fixed;inset:0;
+    background:rgba(15,76,92,.35);
+    align-items:center;justify-content:center;
+    z-index:50;
+    padding:20px;
+  }
+  .modal-overlay.open{display:flex;}
+  .modal{
+    background:var(--paper);
+    border-radius:8px;
+    width:100%;max-width:560px;
+    max-height:88vh;
+    overflow-y:auto;
+    padding:26px 28px 24px;
+    position:relative;
+  }
+  .modal h2{
+    font-family:'Fraunces',serif;
+    color:var(--petroleo);
+    font-size:22px;
+    margin:0 0 18px;
+  }
+  .modal-close{
+    position:absolute;top:18px;right:20px;
+    background:none;border:none;font-size:18px;
+    color:var(--ink-soft);cursor:pointer;
+  }
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px 14px;}
+  .form-grid .full{grid-column:1/-1;}
+  .field label{
+    display:block;font-size:11.5px;font-weight:600;
+    color:var(--ink-soft);margin-bottom:4px;
+    text-transform:uppercase;letter-spacing:.04em;
+  }
+  .field input, .field select, .field textarea{
+    width:100%;font-family:'Inter',sans-serif;font-size:13.5px;
+    padding:9px 10px;border:1px solid var(--mist-line);
+    border-radius:6px;background:var(--cream);color:var(--ink);
+  }
+  .field textarea{resize:vertical;min-height:60px;}
+  .modal-actions{
+    display:flex;justify-content:space-between;
+    margin-top:20px;padding-top:16px;
+    border-top:1px solid var(--mist);
+  }
+  .btn-delete{
+    background:none;border:none;color:var(--coral);
+    font-size:13px;cursor:pointer;font-weight:500;
+  }
+  .btn-cancel{
+    background:none;border:1px solid var(--mist-line);
+    color:var(--ink-soft);padding:9px 16px;border-radius:6px;
+    font-size:13px;cursor:pointer;margin-right:8px;
+  }
+
+  .settings-grid{display:grid;gap:14px;}
+
+  .toast{
+    position:fixed;bottom:24px;right:24px;
+    background:var(--petroleo);color:#fff;
+    padding:12px 18px;border-radius:6px;
+    font-size:13px;box-shadow:0 8px 20px rgba(0,0,0,.15);
+    opacity:0;transform:translateY(10px);
+    transition:.25s;pointer-events:none;
+    z-index:100;
+    max-width:300px;
+  }
+  .toast.show{opacity:1;transform:translateY(0);}
+
+  .shared-note{
+    font-size:11px;color:var(--ink-soft);
+    display:flex;align-items:center;gap:6px;margin-top:2px;
+  }
+  .shared-note::before{content:'●';color:var(--sage);font-size:8px;}
+  .shared-note.offline::before{color:var(--coral);}
+
+  /* LOGIN SCREEN */
+  #loginScreen{
+    position:fixed;inset:0;
+    background:var(--petroleo);
+    display:flex;align-items:center;justify-content:center;
+    z-index:200;
+    padding:20px;
+  }
+  #loginScreen.hidden{display:none;}
+  .login-card{
+    background:var(--paper);
+    border-radius:8px;
+    padding:36px 32px;
+    width:100%;max-width:360px;
+    text-align:center;
+  }
+  .login-card .eyebrow{margin-bottom:10px;}
+  .login-card h1{font-size:24px;margin-bottom:22px;}
+  .login-card .field{text-align:left;margin-bottom:12px;}
+  .login-card input{
+    width:100%;font-family:'Inter',sans-serif;font-size:14px;
+    padding:10px 12px;border:1px solid var(--mist-line);
+    border-radius:6px;background:var(--cream);color:var(--ink);
+  }
+  .login-card .btn-primary{width:100%;padding:11px;margin-top:6px;}
+  .login-error{
+    color:var(--coral);font-size:12.5px;margin-top:10px;
+    min-height:16px;
+  }
+  #appContent{display:none;}
+  #appContent.visible{display:block;}
+  .logout-btn{
+    background:none;border:none;color:var(--ink-soft);
+    font-size:11.5px;cursor:pointer;text-decoration:underline;
+    margin-top:4px;padding:0;
+  }
+
+  @media (max-width:700px){
+    .form-grid{grid-template-columns:1fr;}
+    table{font-size:12px;}
+    thead th, tbody td{padding:8px 6px;}
+    .table-wrap{overflow-x:auto;}
+    table{min-width:820px;}
+  }
+  /* --- HB additions --- */
+  .demo-hint{background:var(--ambar-soft);color:#6b4d00;border-radius:6px;padding:10px 12px;font-size:12.5px;margin-bottom:14px;line-height:1.45;}
+  .demo-banner{margin-top:8px;display:inline-block;background:var(--ambar-soft);color:#6b4d00;font-size:11.5px;padding:4px 10px;border-radius:20px;}
+  .demo-banner button{background:none;border:none;color:#6b4d00;text-decoration:underline;cursor:pointer;font-size:11.5px;padding:0;}
+  .alert-card[data-type="followup"]{--card-accent:var(--sage);}
+  .flag-followup{background:var(--sage);}
+  .badge-etapa1,.badge-etapa2{background:var(--mist);color:var(--ink-soft);}
+  .badge-etapa3,.badge-etapa4{background:var(--ambar-soft);color:#8a6300;}
+  .badge-etapa5,.badge-etapa6,.badge-etapa7{background:#DCEAF0;color:var(--petroleo);}
+  .form-section{grid-column:1/-1;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--petroleo);border-bottom:1px solid var(--mist);padding-bottom:5px;margin-top:8px;}
+  .config-missing{background:var(--coral-soft);color:var(--coral);border-radius:6px;padding:12px;font-size:12.5px;text-align:left;margin-bottom:14px;line-height:1.45;}
+  .dash-row.three{grid-template-columns:1fr 1fr 1fr;}
+  @media (max-width:900px){.dash-row.three{grid-template-columns:1fr;}}
+  .bar-label{width:130px;}
+</style>
+</head>
+<body>
+
+<div id="loginScreen">
+  <div class="login-card">
+    <span class="eyebrow">Instituto HB · Happy Baby</span>
+    <h1 style="font-family:'Fraunces',serif;color:var(--petroleo);">Gestão de Leads</h1>
+    <div class="config-missing" id="configMissing" style="display:none;">
+      Falta conectar o banco de dados. Cole a configuração do Firebase do Instituto HB no início do código (bloco <b>firebaseConfig</b>).
+    </div>
+    <div class="demo-hint">Versão de demonstração com dados fictícios.<br>Clique em <b>Entrar</b> para ver a ferramenta.</div>
+    <div class="field"><input type="email" id="loginEmail" placeholder="E-mail" autocomplete="username"></div>
+    <div class="field"><input type="password" id="loginPassword" placeholder="Senha" autocomplete="current-password"></div>
+    <button class="btn-primary" onclick="doLoginEmail()">Entrar</button>
+    <div style="margin:14px 0;color:var(--ink-soft);font-size:12px;">ou</div>
+    <button class="btn-primary" id="googleLoginBtn" onclick="doLoginGoogle()" style="display:flex;align-items:center;justify-content:center;gap:10px;background:#fff;color:var(--ink);border:1px solid var(--mist-line);">
+      <svg width="18" height="18" viewBox="0 0 18 18"><path fill="#4285F4" d="M17.64 9.2c0-.64-.06-1.25-.16-1.84H9v3.48h4.84c-.21 1.13-.84 2.09-1.8 2.73v2.27h2.92c1.7-1.57 2.68-3.88 2.68-6.64z"/><path fill="#34A853" d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.92-2.27c-.81.54-1.84.86-3.04.86-2.34 0-4.32-1.58-5.03-3.7H.96v2.34C2.44 15.98 5.48 18 9 18z"/><path fill="#FBBC05" d="M3.97 10.71A5.4 5.4 0 013.68 9c0-.59.1-1.17.29-1.71V4.95H.96A9 9 0 000 9c0 1.45.35 2.83.96 4.05l3.01-2.34z"/><path fill="#EA4335" d="M9 3.58c1.32 0 2.5.45 3.44 1.35l2.58-2.58C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.95l3.01 2.34C4.68 5.16 6.66 3.58 9 3.58z"/></svg>
+      Entrar com Google
+    </button>
+    <div class="login-error" id="loginError"></div>
+  </div>
+</div>
+
+<div id="appContent">
+<div class="wrap">
+
+  <header>
+    <div>
+      <span class="eyebrow">Instituto HB · Happy Baby</span>
+      <h1>Gestão de Leads</h1>
+      <div class="shared-note" id="syncStatus">Conectando ao banco de dados...</div>
+      <button class="logout-btn" onclick="doLogout()">sair</button>
+      <div class="demo-banner">Demonstração · dados fictícios · <button onclick="if(confirm('Restaurar os dados de exemplo? As alterações feitas serão apagadas.'))resetDemo()">restaurar exemplo</button></div>
+    </div>
+    <div>
+      <div class="today" id="todayLabel"></div>
+      <button class="settings-btn" onclick="toggleDashboard()">📊 Dashboard</button>
+      <button class="settings-btn" onclick="openSettings()">⚙ Configurar alertas</button>
+    </div>
+  </header>
+
+  <div class="alerts">
+    <div class="alert-card" data-type="retorno" onclick="toggleFilter('retorno')">
+      <div class="alert-count" id="countRetorno">0</div>
+      <div class="alert-label">Sem retorno há <span id="diasRetornoLabel">3</span>+ dias</div>
+    </div>
+    <div class="alert-card" data-type="followup" onclick="toggleFilter('followup')">
+      <div class="alert-count" id="countFollowup">0</div>
+      <div class="alert-label">Follow-up da proposta para hoje (D+1, D+3, D+7, D+15)</div>
+    </div>
+    <div class="alert-card" data-type="aniversario" onclick="toggleFilter('aniversario')">
+      <div class="alert-count" id="countAniversario">0</div>
+      <div class="alert-label">Aniversário da criança nos próximos <span id="diasAniversarioLabel">7</span> dias</div>
+    </div>
+    <div class="alert-card" data-type="prazo" onclick="toggleFilter('prazo')">
+      <div class="alert-count" id="countPrazo">0</div>
+      <div class="alert-label">Reserva de vaga ou prazo de matrícula perto do fim</div>
+    </div>
+  </div>
+
+  <div id="dashboardPanel">
+    <div class="dash-title">Visão geral</div>
+    <div class="dash-stats" id="dashStats"></div>
+    <div class="dash-row">
+      <div>
+        <div class="dash-block-title">Leads por etapa do funil</div>
+        <div id="dashStatusBars"></div>
+      </div>
+      <div>
+        <div class="dash-block-title">Cadastros por mês (últimos 6 meses)</div>
+        <div id="dashMonthBars"></div>
+      </div>
+    </div>
+    <div class="dash-row three">
+      <div>
+        <div class="dash-block-title">Leads por origem</div>
+        <div id="dashOrigemBars"></div>
+      </div>
+      <div>
+        <div class="dash-block-title">Leads por segmento</div>
+        <div id="dashSegmentoBars"></div>
+      </div>
+      <div>
+        <div class="dash-block-title">Motivos de perda</div>
+        <div id="dashPerdaBars"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toolbar">
+    <input type="text" id="searchInput" placeholder="Buscar por criança, responsável ou contato..." oninput="renderTable()">
+    <select id="statusFilter" onchange="renderTable()"></select>
+    <select id="segmentoFilter" onchange="renderTable()">
+      <option value="">Todos os segmentos</option>
+      <option>Educação Infantil</option>
+      <option>Ensino Fundamental I</option>
+    </select>
+    <span id="activeFilterTag"></span>
+    <button class="btn-cancel" onclick="exportCSV()">⬇ Exportar planilha</button>
+    <button class="btn-primary" onclick="openLeadModal()">+ Novo lead</button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th></th>
+          <th>Criança / Responsável</th>
+          <th>Contato</th>
+          <th>Origem</th>
+          <th>Turma / Turno</th>
+          <th>1º Contato</th>
+          <th>Último Retorno</th>
+          <th>Etapa</th>
+          <th>Responsável</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div class="empty-state" id="emptyState" style="display:none;">
+      <span class="eyebrow">Nenhum lead ainda</span>
+      <h3>Comece cadastrando o primeiro contato</h3>
+      <div>Clique em "+ Novo lead" para adicionar.</div>
+    </div>
+  </div>
+
+</div>
+</div>
+<!-- /appContent -->
+
+<!-- LEAD MODAL -->
+<div class="modal-overlay" id="leadModalOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeLeadModal()">✕</button>
+    <h2 id="leadModalTitle">Novo lead</h2>
+    <div class="form-grid">
+      <div class="form-section">Família e criança</div>
+      <div class="field"><label>Nome da criança</label><input type="text" id="f_nomeCrianca"></div>
+      <div class="field"><label>Nome do responsável</label><input type="text" id="f_nomeResponsavel"></div>
+      <div class="field"><label>Contato (WhatsApp)</label><input type="text" id="f_contato" placeholder="(31) 9...."></div>
+      <div class="field"><label>Data de nascimento</label><input type="date" id="f_dataNascimento"></div>
+      <div class="field"><label>Origem do lead</label><select id="f_origem"></select></div>
+      <div class="field"><label>Atendido por</label><select id="f_responsavelAtendimento"></select></div>
+
+      <div class="form-section">Qualificação</div>
+      <div class="field"><label>Segmento</label><select id="f_segmento"><option value="">—</option><option>Educação Infantil</option><option>Ensino Fundamental I</option></select></div>
+      <div class="field"><label>Turma / ano de interesse</label><input type="text" id="f_serieTurma"></div>
+      <div class="field"><label>Turno</label><select id="f_turno"><option value="">—</option><option>Manhã</option><option>Tarde</option><option>Integral</option></select></div>
+      <div class="field"><label>Ano de ingresso</label><input type="text" id="f_anoIngresso" placeholder="2027"></div>
+      <div class="field"><label>Escola atual</label><input type="text" id="f_escolaAtual"></div>
+      <div class="field"><label>Quem participa da decisão</label><input type="text" id="f_quemDecide"></div>
+      <div class="field full"><label>Motivo da busca / o que é mais importante para a família</label><textarea id="f_motivoBusca"></textarea></div>
+
+      <div class="form-section">Funil</div>
+      <div class="field"><label>Etapa</label><select id="f_status" onchange="togglePerda()"></select></div>
+      <div class="field"><label>Data do 1º contato</label><input type="date" id="f_dataPrimeiroContato"></div>
+      <div class="field"><label>Data do último retorno</label><input type="date" id="f_dataRetorno"></div>
+      <div class="field"><label>Data da visita</label><input type="date" id="f_dataVisita"></div>
+      <div class="field"><label>Visita</label><select id="f_visitaStatus"><option value="">—</option><option>Agendada</option><option>Realizada</option><option>Faltou</option></select></div>
+      <div class="field"><label>Data da proposta</label><input type="date" id="f_dataProposta"></div>
+      <div class="field"><label>Prazo de reserva da vaga</label><input type="date" id="f_prazoReserva"></div>
+      <div class="field" id="perdaField"><label>Motivo de perda</label><select id="f_motivoPerda"></select></div>
+      <div class="field full"><label>Observações</label><textarea id="f_observacoes"></textarea></div>
+    </div>
+    <div class="modal-actions">
+      <div>
+        <button class="btn-delete" id="deleteBtn" style="display:none;" onclick="deleteLead()">Excluir lead</button>
+      </div>
+      <div>
+        <button class="btn-cancel" onclick="closeLeadModal()">Cancelar</button>
+        <button class="btn-primary" onclick="saveLead()">Salvar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModalOverlay">
+  <div class="modal">
+    <button class="modal-close" onclick="closeSettings()">✕</button>
+    <h2>Configurar alertas</h2>
+    <div class="settings-grid">
+      <div class="field">
+        <label>Alertar "sem retorno" após quantos dias sem contato</label>
+        <input type="number" id="s_diasRetorno" min="1">
+      </div>
+      <div class="field">
+        <label>Alertar aniversário da criança com quantos dias de antecedência</label>
+        <input type="number" id="s_diasAniversario" min="1">
+      </div>
+      <div class="field">
+        <label>Data limite de matrícula (período atual)</label>
+        <input type="date" id="s_prazoMatricula">
+      </div>
+      <div class="field">
+        <label>Alertar prazo de matrícula / reserva com quantos dias de antecedência</label>
+        <input type="number" id="s_diasPrazo" min="1">
+      </div>
+      <div class="field">
+        <label>Pessoas que atendem (separe por vírgula)</label>
+        <input type="text" id="s_equipe" placeholder="Maria Elisa, Patrícia, Jaqueline">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <div></div>
+      <div>
+        <button class="btn-cancel" onclick="closeSettings()">Cancelar</button>
+        <button class="btn-primary" onclick="saveSettings()">Salvar configurações</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== VERSÃO DE DEMONSTRAÇÃO: sem Firebase, dados ficam só neste navegador =====
+const STORE_KEY='hb-crm-demo-v1';
+const iso=n=>{const d=new Date();d.setDate(d.getDate()+n);return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
+const bday=(ageY,inDays)=>{const d=new Date();d.setFullYear(d.getFullYear()-ageY);d.setDate(d.getDate()+inDays);return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
+function seed(){ return {
+ config:{ settings:{ diasRetorno:3, diasAniversario:7, prazoMatricula:iso(45), diasPrazo:15, equipe:'Maria Elisa, Patrícia, Jaqueline' } },
+ leads:{
+  l01:{nomeCrianca:'Helena Souza',nomeResponsavel:'Carla Souza (mãe)',contato:'(31) 98811-2034',dataNascimento:bday(3,4),origem:'Instagram',responsavelAtendimento:'Maria Elisa',segmento:'Educação Infantil',serieTurma:'Maternal II',turno:'Integral',anoIngresso:'2027',escolaAtual:'Nenhuma (fica com a avó)',quemDecide:'Mãe e pai',motivoBusca:'Volta ao trabalho; quer rotina e alimentação acompanhadas.',status:'etapa6',dataPrimeiroContato:iso(-12),dataRetorno:iso(-5),dataVisita:iso(-5),visitaStatus:'Realizada',dataProposta:iso(-3),prazoReserva:iso(4),observacoes:'Gostou muito do parque. Pediu condição para irmão no futuro.'},
+  l02:{nomeCrianca:'Miguel Andrade',nomeResponsavel:'Rafael Andrade (pai)',contato:'(31) 99702-5510',origem:'Tráfego pago',responsavelAtendimento:'Maria Elisa',segmento:'Ensino Fundamental I',serieTurma:'1º ano',turno:'Tarde',anoIngresso:'2027',escolaAtual:'Escola Municipal do bairro',quemDecide:'Pai e mãe',motivoBusca:'Alfabetização e turmas menores.',status:'etapa4',dataPrimeiroContato:iso(-6),dataRetorno:iso(-1),dataVisita:iso(2),visitaStatus:'Agendada',observacoes:'Visita marcada às 9h. Confirmar na véspera.'},
+  l03:{nomeCrianca:'Laura Martins',nomeResponsavel:'Juliana Martins (mãe)',contato:'(31) 98455-7781',dataNascimento:bday(2,2),origem:'Indicação',responsavelAtendimento:'Patrícia',segmento:'Educação Infantil',serieTurma:'Maternal I',turno:'Manhã',anoIngresso:'2027',quemDecide:'Mãe',motivoBusca:'Indicação da família da Sofia (aluna).',status:'matriculado',dataPrimeiroContato:iso(-30),dataRetorno:iso(-18),dataVisita:iso(-25),visitaStatus:'Realizada',dataProposta:iso(-24),observacoes:'Matrícula assinada. Enviar guia de boas-vindas.'},
+  l04:{nomeCrianca:'Pedro Lima',nomeResponsavel:'Ana Paula Lima (mãe)',contato:'(31) 99120-4432',origem:'WhatsApp',responsavelAtendimento:'Maria Elisa',segmento:'Educação Infantil',serieTurma:'Berçário',turno:'Integral',anoIngresso:'2027',quemDecide:'Mãe e pai',status:'etapa2',dataPrimeiroContato:iso(-5),observacoes:'Parou de responder na qualificação.'},
+  l05:{nomeCrianca:'Isabela Rocha',nomeResponsavel:'Fernanda Rocha (mãe)',contato:'(31) 98760-3321',origem:'Instagram',responsavelAtendimento:'Jaqueline',segmento:'Ensino Fundamental I',serieTurma:'2º ano',turno:'Tarde',anoIngresso:'2027',escolaAtual:'Colégio particular',quemDecide:'Mãe',motivoBusca:'Insatisfeita com a comunicação da escola atual.',status:'perdido',motivoPerda:'Preço',dataPrimeiroContato:iso(-40),dataRetorno:iso(-20),dataVisita:iso(-35),visitaStatus:'Realizada',dataProposta:iso(-34),observacoes:'Respondeu no D+15: valor acima do orçamento.'},
+  l06:{nomeCrianca:'Davi Ferreira',nomeResponsavel:'Lucas Ferreira (pai)',contato:'(31) 99234-8890',origem:'Facebook',responsavelAtendimento:'Patrícia',segmento:'Educação Infantil',serieTurma:'Jardim I',turno:'Manhã',anoIngresso:'2027',status:'etapa7',dataPrimeiroContato:iso(-20),dataRetorno:iso(-8),dataVisita:iso(-16),visitaStatus:'Realizada',dataProposta:iso(-15),observacoes:'Último contato da sequência (D+15) hoje.'},
+  l07:{nomeCrianca:'Alice Mendes',nomeResponsavel:'Priscila Mendes (mãe)',contato:'(31) 98100-6643',origem:'Tráfego pago',responsavelAtendimento:'Maria Elisa',segmento:'Educação Infantil',serieTurma:'Maternal II',turno:'Tarde',status:'etapa1',dataPrimeiroContato:iso(0),observacoes:'Chegou pelo anúncio de matrículas 2027.'},
+  l08:{nomeCrianca:'Theo Carvalho',nomeResponsavel:'Mariana Carvalho (mãe)',contato:'(31) 99877-1120',origem:'Indicação',responsavelAtendimento:'Patrícia',segmento:'Educação Infantil',serieTurma:'Jardim II',turno:'Integral',status:'matriculado',dataPrimeiroContato:iso(-55),dataVisita:iso(-50),visitaStatus:'Realizada',dataProposta:iso(-49),dataRetorno:iso(-45)},
+  l09:{nomeCrianca:'Manuela Dias',nomeResponsavel:'Bianca Dias (mãe)',contato:'(31) 98321-5567',origem:'Instagram',responsavelAtendimento:'Jaqueline',segmento:'Educação Infantil',serieTurma:'Maternal I',turno:'Manhã',status:'etapa5',dataPrimeiroContato:iso(-9),dataRetorno:iso(-1),dataVisita:iso(-1),visitaStatus:'Realizada',observacoes:'Enviar proposta formal hoje (até 24h).'},
+  l10:{nomeCrianca:'Arthur Gomes',nomeResponsavel:'Tiago Gomes (pai)',contato:'(31) 99654-2210',origem:'Tráfego pago',responsavelAtendimento:'Maria Elisa',segmento:'Ensino Fundamental I',serieTurma:'1º ano',turno:'Tarde',status:'perdido',motivoPerda:'Distância',dataPrimeiroContato:iso(-70),dataRetorno:iso(-60)},
+  l11:{nomeCrianca:'Valentina Reis',nomeResponsavel:'Camila Reis (mãe)',contato:'(31) 98200-9987',origem:'WhatsApp',responsavelAtendimento:'Maria Elisa',segmento:'Educação Infantil',serieTurma:'Jardim I',turno:'Tarde',status:'etapa3',dataPrimeiroContato:iso(-2),dataRetorno:iso(-1),observacoes:'Convite para visita enviado; aguardando dia.'},
+  l12:{nomeCrianca:'Gabriel Nunes',nomeResponsavel:'Renata Nunes (mãe)',contato:'(31) 99011-3345',origem:'Demanda espontânea',responsavelAtendimento:'Patrícia',segmento:'Educação Infantil',serieTurma:'Maternal II',turno:'Integral',status:'etapa4',dataPrimeiroContato:iso(-8),dataVisita:iso(-1),visitaStatus:'Faltou',dataRetorno:iso(-1),observacoes:'Não compareceu. Remarcar em até 24h.'},
+  l13:{nomeCrianca:'Lorena Pires',nomeResponsavel:'Daniela Pires (mãe)',contato:'(31) 98777-4412',origem:'Instagram',responsavelAtendimento:'Jaqueline',segmento:'Educação Infantil',serieTurma:'Berçário',turno:'Integral',status:'matriculado',dataPrimeiroContato:iso(-95),dataVisita:iso(-90),visitaStatus:'Realizada',dataProposta:iso(-89)},
+  l14:{nomeCrianca:'Benício Alves',nomeResponsavel:'Sérgio Alves (pai)',contato:'(31) 99543-6678',origem:'Facebook',responsavelAtendimento:'Maria Elisa',segmento:'Educação Infantil',serieTurma:'Jardim II',turno:'Manhã',status:'perdido',motivoPerda:'Escolheu outra escola',dataPrimeiroContato:iso(-110),dataVisita:iso(-104),visitaStatus:'Realizada',dataProposta:iso(-103)},
+  l15:{nomeCrianca:'Cecília Moura',nomeResponsavel:'Aline Moura (mãe)',contato:'(31) 98444-2290',origem:'Indicação',responsavelAtendimento:'Patrícia',segmento:'Ensino Fundamental I',serieTurma:'3º ano',turno:'Tarde',status:'etapa6',dataPrimeiroContato:iso(-14),dataRetorno:iso(-6),dataVisita:iso(-8),visitaStatus:'Realizada',dataProposta:iso(-7),prazoReserva:iso(10),observacoes:'Follow-up D+7 hoje: enviar depoimento.'},
+  l16:{nomeCrianca:'Enzo Barbosa',nomeResponsavel:'Patrícia Barbosa (mãe)',contato:'(31) 99300-1176',origem:'Tráfego pago',responsavelAtendimento:'Maria Elisa',segmento:'Educação Infantil',serieTurma:'Maternal I',turno:'Tarde',status:'etapa2',dataPrimeiroContato:iso(-140)},
+ }};}
+let store; try{ store=JSON.parse(localStorage.getItem(STORE_KEY)) }catch(e){} if(!store||!store.leads) store=seed();
+const subs=[];
+function persist(){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){} subs.forEach(f=>f()); }
+window.resetDemo=function(){ store=seed(); persist(); };
+function initializeApp(){return {}}
+function getFirestore(){return {}}
+function collection(db,n){return {col:n}}
+function doc(db,c,id){return {c,id}}
+function serverTimestamp(){return new Date().toISOString()}
+function onSnapshot(ref,cb){
+  const f=()=>{ if(ref.col) cb({docs:Object.entries(store.leads).map(([id,v])=>({id,data:()=>v}))});
+               else cb({exists:()=>!!store.config[ref.id],data:()=>store.config[ref.id]}); };
+  subs.push(f); setTimeout(f,0); return ()=>{ const i=subs.indexOf(f); if(i>=0) subs.splice(i,1); };
+}
+async function setDoc(ref,data,opt){ const col=ref.c==='leads'?store.leads:store.config; col[ref.id]=opt&&opt.merge?{...col[ref.id],...data}:data; persist(); }
+async function deleteDoc(ref){ delete store.leads[ref.id]; persist(); }
+let authCb=null, demoUser=null;
+function getAuth(){return {}}
+class GoogleAuthProvider{}
+async function signInWithPopup(){ demoUser={email:'denneacardososuporte@gmail.com'}; authCb&&authCb(demoUser); }
+async function signInWithEmailAndPassword(){ demoUser={email:'denneacardososuporte@gmail.com'}; authCb&&authCb(demoUser); }
+function signOut(){ demoUser=null; authCb&&authCb(null); }
+function onAuthStateChanged(a,cb){ authCb=cb; setTimeout(()=>cb(demoUser),0); }
+
+// =====================================================================
+// 1) COLE AQUI A CONFIGURAÇÃO DO FIREBASE DO INSTITUTO HB
+//    (Firebase > Configurações do projeto > Seus apps > Configuração do SDK)
+// =====================================================================
+const firebaseConfig = { apiKey:"demo", authDomain:"demo", projectId:"demo", storageBucket:"demo", messagingSenderId:"demo", appId:"demo" };
+
+// =====================================================================
+// 2) E-MAILS QUE PODEM ENTRAR NA FERRAMENTA (um por linha, entre aspas)
+// =====================================================================
+const ALLOWED_EMAILS = [
+  'denneacardososuporte@gmail.com',
+  'gilbertonv@gmail.com'
+];
+
+// ---------- LISTAS DO FUNIL HB ----------
+const ETAPAS = [
+  { key:'etapa1', label:'1 · Primeiro contato' },
+  { key:'etapa2', label:'2 · Qualificação' },
+  { key:'etapa3', label:'3 · Convite para visita' },
+  { key:'etapa4', label:'4 · Visita agendada' },
+  { key:'etapa5', label:'5 · Visita realizada' },
+  { key:'etapa6', label:'6 · Proposta enviada' },
+  { key:'etapa7', label:'7 · Follow-up / retomada' },
+  { key:'matriculado', label:'8 · Matriculado' },
+  { key:'perdido', label:'Perdido' },
+];
+const ORIGENS = ['WhatsApp','Instagram','Facebook','Tráfego pago','Indicação','Demanda espontânea','Outro'];
+const MOTIVOS_PERDA = ['Preço','Distância','Turno ou horário','Falta de vaga','Proposta pedagógica','Escolheu outra escola','Outro'];
+const FOLLOWUP_DIAS = [1,3,7,15];
+
+const configOk = !Object.values(firebaseConfig).some(v => !v || v === 'COLE_AQUI');
+let db, auth, leadsCol, settingsDocRef;
+if(configOk){
+  const app = initializeApp(firebaseConfig);
+  db = getFirestore(app);
+  auth = getAuth(app);
+  leadsCol = collection(db, 'leads');
+  settingsDocRef = doc(db, 'config', 'settings');
+}else{
+  document.getElementById('configMissing').style.display = 'block';
+}
+
+const DEFAULT_SETTINGS = { diasRetorno:3, diasAniversario:7, prazoMatricula:'', diasPrazo:15, equipe:'Maria Elisa, Patrícia, Jaqueline' };
+let leads = [];
+let settings = { ...DEFAULT_SETTINGS };
+let editingId = null;
+let activeFilter = null;
+let unsubLeads = null;
+let unsubSettings = null;
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fillSelect = (id, items, first) => {
+  document.getElementById(id).innerHTML = (first!==undefined ? `<option value="">${first}</option>` : '') +
+    items.map(i => typeof i === 'string' ? `<option>${esc(i)}</option>` : `<option value="${i.key}">${esc(i.label)}</option>`).join('');
+};
+fillSelect('statusFilter', ETAPAS, 'Todas as etapas');
+fillSelect('f_status', ETAPAS);
+fillSelect('f_origem', ORIGENS, '—');
+fillSelect('f_motivoPerda', MOTIVOS_PERDA, '—');
+function equipeList(){ return (settings.equipe||'').split(',').map(s=>s.trim()).filter(Boolean); }
+function fillEquipe(current){
+  const list = equipeList();
+  if(current && !list.includes(current)) list.push(current);
+  fillSelect('f_responsavelAtendimento', list, '—');
+}
+
+// ---------- AUTH ----------
+window.doLoginGoogle = async function(){
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+  if(!configOk){ errEl.textContent = 'Banco de dados ainda não configurado.'; return; }
+  try{ await signInWithPopup(auth, new GoogleAuthProvider()); }
+  catch(e){ console.error(e); errEl.textContent = 'Não foi possível entrar com Google. Tente novamente.'; }
+}
+window.doLoginEmail = async function(){
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+  const errEl = document.getElementById('loginError');
+  errEl.textContent = '';
+  if(!configOk){ errEl.textContent = 'Banco de dados ainda não configurado.'; return; }
+  try{ await signInWithEmailAndPassword(auth, email, password); }
+  catch(e){ console.error(e); errEl.textContent = 'E-mail ou senha incorretos.'; }
+}
+window.doLogout = function(){ if(auth) signOut(auth); }
+
+if(configOk){
+  onAuthStateChanged(auth, user=>{
+    const loginScreen = document.getElementById('loginScreen');
+    const appContent = document.getElementById('appContent');
+    const errEl = document.getElementById('loginError');
+    if(user && !ALLOWED_EMAILS.map(e=>e.toLowerCase()).includes((user.email||'').toLowerCase())){
+      errEl.textContent = 'Esse e-mail não tem acesso a essa ferramenta.';
+      signOut(auth);
+      return;
+    }
+    if(user){
+      errEl.textContent = '';
+      loginScreen.classList.add('hidden');
+      appContent.classList.add('visible');
+      startListeners();
+    }else{
+      loginScreen.classList.remove('hidden');
+      appContent.classList.remove('visible');
+      if(unsubLeads) unsubLeads();
+      if(unsubSettings) unsubSettings();
+    }
+  });
+}
+
+const todayStr = () => { const d=new Date(); return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10); };
+document.getElementById('todayLabel').textContent = new Date().toLocaleDateString('pt-BR', { weekday:'long', day:'2-digit', month:'long', year:'numeric' });
+
+function daysBetween(d1, d2){
+  const a = new Date(d1+'T00:00:00'), b = new Date(d2+'T00:00:00');
+  return Math.round((b-a)/(1000*60*60*24));
+}
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2400);
+}
+function setSyncStatus(text, offline){
+  const el = document.getElementById('syncStatus');
+  el.textContent = text; el.classList.toggle('offline', !!offline);
+}
+
+// ---------- REAL-TIME LISTENERS ----------
+function startListeners(){
+  unsubLeads = onSnapshot(leadsCol, snapshot=>{
+    leads = snapshot.docs.map(d=>({ id:d.id, ...d.data() }));
+    setSyncStatus('Sincronizado em tempo real');
+    renderTable();
+  }, err=>{
+    console.error(err);
+    setSyncStatus('Sem conexão com o banco de dados', true);
+  });
+  unsubSettings = onSnapshot(settingsDocRef, snap=>{
+    if(snap.exists()){
+      settings = { ...DEFAULT_SETTINGS, ...snap.data() };
+      document.getElementById('diasRetornoLabel').textContent = settings.diasRetorno;
+      document.getElementById('diasAniversarioLabel').textContent = settings.diasAniversario;
+      renderTable();
+    }
+  });
+}
+
+// ---------- ALERT LOGIC ----------
+const isClosed = l => l.status==='matriculado' || l.status==='perdido';
+function getLastTouch(lead){
+  const dates = [lead.dataPrimeiroContato, lead.dataRetorno, lead.dataVisita, lead.dataProposta].filter(d => d && d <= todayStr());
+  return dates.length ? dates.sort().reverse()[0] : null;
+}
+function isSemRetorno(lead){
+  if(isClosed(lead)) return false;
+  const last = getLastTouch(lead);
+  if(!last) return false;
+  return daysBetween(last, todayStr()) >= settings.diasRetorno;
+}
+function followupHoje(lead){
+  if(isClosed(lead) || !lead.dataProposta) return null;
+  const d = daysBetween(lead.dataProposta, todayStr());
+  if(!FOLLOWUP_DIAS.includes(d)) return null;
+  if(lead.dataRetorno && lead.dataRetorno >= todayStr()) return null; // já falou hoje
+  return 'D+'+d;
+}
+function isAniversarioProximo(lead){
+  if(!lead.dataNascimento) return false;
+  const today = new Date(); const t0 = new Date(today.getFullYear(),today.getMonth(),today.getDate());
+  const [y,m,dd] = lead.dataNascimento.split('-').map(Number);
+  let next = new Date(today.getFullYear(), m-1, dd);
+  if(next < t0) next = new Date(today.getFullYear()+1, m-1, dd);
+  const diff = Math.round((next - t0)/(1000*60*60*24));
+  return diff >= 0 && diff <= settings.diasAniversario;
+}
+function isPrazoProximo(lead){
+  if(isClosed(lead)) return false;
+  const limites = [lead.prazoReserva, settings.prazoMatricula].filter(Boolean);
+  return limites.some(p => { const diff = daysBetween(todayStr(), p); return diff >= 0 && diff <= settings.diasPrazo; });
+}
+const etapaLabel = k => (ETAPAS.find(e=>e.key===k)||ETAPAS[0]).label;
+function statusBadge(status){
+  const cls = status==='matriculado' ? 'badge-matriculado' : status==='perdido' ? 'badge-perdido' : 'badge-'+(status||'etapa1');
+  return `<span class="badge ${cls}">${esc(etapaLabel(status))}</span>`;
+}
+function fmtDate(d){
+  if(!d) return '<span class="sub">—</span>';
+  const [y,m,day] = d.split('-');
+  return `${day}/${m}/${y}`;
+}
+window.toggleFilter = function(type){ activeFilter = (activeFilter===type) ? null : type; renderTable(); }
+window.toggleDashboard = function(){
+  const panel = document.getElementById('dashboardPanel');
+  panel.classList.toggle('open');
+  if(panel.classList.contains('open')) renderDashboard();
+}
+
+function bars(elId, items, color){
+  const max = Math.max(1, ...items.map(i=>i.val));
+  document.getElementById(elId).innerHTML = items.map(i=>`<div class="bar-row">
+      <div class="bar-label">${esc(i.label)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${Math.round(i.val/max*100)}%;background:${i.color||color};"></div></div>
+      <div class="bar-value">${i.val}</div></div>`).join('') || '<div class="sub">Sem dados ainda.</div>';
+}
+const pct = (a,b) => b>0 ? Math.round(a/b*100)+'%' : '—';
+
+function renderDashboard(){
+  const total = leads.length;
+  const count = f => leads.filter(f).length;
+  const matriculados = count(l=>l.status==='matriculado');
+  const perdidos = count(l=>l.status==='perdido');
+  const comVisitaAgendada = count(l=>l.dataVisita || l.visitaStatus);
+  const visitasRealizadas = count(l=>l.visitaStatus==='Realizada' || ['etapa5','etapa6','etapa7'].includes(l.status) || (l.status==='matriculado' && l.visitaStatus!=='Faltou' && l.dataVisita));
+  const now = new Date();
+  const since = n => { const d=new Date(now); d.setDate(d.getDate()-n); return count(l=>l.dataPrimeiroContato && new Date(l.dataPrimeiroContato) >= d); };
+
+  const stats = [
+    { num: total, lbl:'Total de leads' },
+    { num: total - matriculados - perdidos, lbl:'Em aberto no funil' },
+    { num: matriculados, lbl:'Matriculados' },
+    { num: perdidos, lbl:'Perdidos' },
+    { num: pct(comVisitaAgendada,total), lbl:'Lead → visita agendada' },
+    { num: pct(visitasRealizadas,comVisitaAgendada), lbl:'Comparecimento às visitas' },
+    { num: pct(matriculados,visitasRealizadas), lbl:'Visita → matrícula' },
+    { num: pct(matriculados,total), lbl:'Conversão geral' },
+    { num: since(7), lbl:'Novos nos últimos 7 dias' },
+    { num: since(30), lbl:'Novos nos últimos 30 dias' },
+  ];
+  document.getElementById('dashStats').innerHTML = stats.map(s=>`<div class="dash-stat"><div class="num">${s.num}</div><div class="lbl">${s.lbl}</div></div>`).join('');
+
+  const etapaColor = k => k==='matriculado'?'var(--sage)':k==='perdido'?'var(--coral)':'var(--petroleo)';
+  bars('dashStatusBars', ETAPAS.map(e=>({label:e.label, val:count(l=>(l.status||'etapa1')===e.key), color:etapaColor(e.key)})));
+
+  const months = [];
+  for(let i=5;i>=0;i--){
+    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+    months.push({ y:d.getFullYear(), m:d.getMonth(), label:d.toLocaleDateString('pt-BR',{month:'short'}).replace('.','') });
+  }
+  bars('dashMonthBars', months.map(mo=>({label:mo.label, val:count(l=>{ if(!l.dataPrimeiroContato) return false; const [y,m]=l.dataPrimeiroContato.split('-').map(Number); return y===mo.y && m-1===mo.m; })})), 'var(--petroleo)');
+  bars('dashOrigemBars', [...ORIGENS,'Não informado'].map(o=>({label:o, val:count(l=>(l.origem||'Não informado')===o)})).filter(i=>i.val>0), 'var(--ambar)');
+  bars('dashSegmentoBars', ['Educação Infantil','Ensino Fundamental I','Não informado'].map(o=>({label:o, val:count(l=>(l.segmento||'Não informado')===o)})).filter(i=>i.val>0), 'var(--petroleo)');
+  bars('dashPerdaBars', MOTIVOS_PERDA.map(o=>({label:o, val:count(l=>l.status==='perdido' && l.motivoPerda===o)})).filter(i=>i.val>0), 'var(--coral)');
+}
+
+function renderTable(){
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const statusF = document.getElementById('statusFilter').value;
+  const segF = document.getElementById('segmentoFilter').value;
+
+  document.getElementById('countRetorno').textContent = leads.filter(isSemRetorno).length;
+  document.getElementById('countFollowup').textContent = leads.filter(followupHoje).length;
+  document.getElementById('countAniversario').textContent = leads.filter(isAniversarioProximo).length;
+  document.getElementById('countPrazo').textContent = leads.filter(isPrazoProximo).length;
+
+  document.querySelectorAll('.alert-card').forEach(c=>c.classList.toggle('active-filter', c.dataset.type===activeFilter));
+  const tag = document.getElementById('activeFilterTag');
+  const labels = {retorno:'sem retorno',followup:'follow-up hoje',aniversario:'aniversário próximo',prazo:'prazo / reserva'};
+  tag.innerHTML = activeFilter ? `<button class="clear-filter" onclick="toggleFilter('${activeFilter}')">✕ filtro: ${labels[activeFilter]}</button>` : '';
+
+  const filtered = leads.filter(l=>{
+    if(search && !`${l.nomeCrianca} ${l.nomeResponsavel} ${l.contato}`.toLowerCase().includes(search)) return false;
+    if(statusF && (l.status||'etapa1') !== statusF) return false;
+    if(segF && l.segmento !== segF) return false;
+    if(activeFilter==='retorno' && !isSemRetorno(l)) return false;
+    if(activeFilter==='followup' && !followupHoje(l)) return false;
+    if(activeFilter==='aniversario' && !isAniversarioProximo(l)) return false;
+    if(activeFilter==='prazo' && !isPrazoProximo(l)) return false;
+    return true;
+  }).sort((a,b)=>(b.dataPrimeiroContato||'').localeCompare(a.dataPrimeiroContato||''));
+
+  const tbody = document.getElementById('tableBody');
+  const empty = document.getElementById('emptyState');
+  if(leads.length===0){ empty.style.display='block'; tbody.innerHTML=''; return; }
+  empty.style.display='none';
+
+  tbody.innerHTML = filtered.map(l=>{
+    let flags = '';
+    if(isSemRetorno(l)) flags += '<span class="flag flag-retorno" title="Sem retorno"></span>';
+    const fu = followupHoje(l); if(fu) flags += `<span class="flag flag-followup" title="Follow-up ${fu} hoje"></span>`;
+    if(isAniversarioProximo(l)) flags += '<span class="flag flag-aniversario" title="Aniversário próximo"></span>';
+    if(isPrazoProximo(l)) flags += '<span class="flag flag-prazo" title="Prazo / reserva perto do fim"></span>';
+    const turma = [l.serieTurma, l.turno].filter(Boolean).map(esc).join(' · ');
+    return `<tr>
+      <td>${flags}</td>
+      <td><div class="name-cell">${esc(l.nomeCrianca)||'—'}</div><div class="sub">${esc(l.nomeResponsavel)}</div></td>
+      <td>${esc(l.contato)||'<span class="sub">—</span>'}</td>
+      <td>${esc(l.origem)||'<span class="sub">—</span>'}</td>
+      <td>${turma||'<span class="sub">—</span>'}${l.segmento?`<div class="sub">${esc(l.segmento)}</div>`:''}</td>
+      <td>${fmtDate(l.dataPrimeiroContato)}</td>
+      <td>${fmtDate(l.dataRetorno)}${fu?`<div class="sub" style="color:var(--sage);font-weight:600;">${fu} hoje</div>`:''}</td>
+      <td>${statusBadge(l.status)}${l.status==='perdido'&&l.motivoPerda?`<div class="sub">${esc(l.motivoPerda)}</div>`:''}</td>
+      <td class="sub">${esc(l.responsavelAtendimento)||'—'}</td>
+      <td class="row-actions"><button onclick="openLeadModal('${esc(l.id)}')">editar</button></td>
+    </tr>`;
+  }).join('');
+  if(filtered.length===0) tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:30px;color:var(--ink-soft);">Nenhum lead encontrado com esses filtros.</td></tr>`;
+  if(document.getElementById('dashboardPanel').classList.contains('open')) renderDashboard();
+}
+window.renderTable = renderTable;
+
+// ---------- EXPORT CSV ----------
+const FIELDS = [
+  ['nomeCrianca','Nome da Criança'],['nomeResponsavel','Nome do Responsável'],['contato','Contato'],
+  ['dataNascimento','Data de Nascimento','date'],['origem','Origem'],['responsavelAtendimento','Atendido por'],
+  ['segmento','Segmento'],['serieTurma','Turma/Ano'],['turno','Turno'],['anoIngresso','Ano de Ingresso'],
+  ['escolaAtual','Escola Atual'],['quemDecide','Quem Decide'],['motivoBusca','Motivo da Busca'],
+  ['status','Etapa','etapa'],['dataPrimeiroContato','Data 1º Contato','date'],['dataRetorno','Último Retorno','date'],
+  ['dataVisita','Data da Visita','date'],['visitaStatus','Visita'],['dataProposta','Data da Proposta','date'],
+  ['prazoReserva','Prazo de Reserva','date'],['motivoPerda','Motivo de Perda'],['observacoes','Observações']
+];
+window.exportCSV = function(){
+  if(leads.length===0){ showToast('Não há leads para exportar.'); return; }
+  const cell = (l,[k,,t]) => { const v = l[k]||''; if(!v) return ''; if(t==='date') return v.split('-').reverse().join('/'); if(t==='etapa') return etapaLabel(v); return String(v).replace(/\n/g,' '); };
+  const escapeCell = s => /[;"\n]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+  const lines = [FIELDS.map(f=>f[1]), ...leads.map(l=>FIELDS.map(f=>cell(l,f)))].map(r=>r.map(escapeCell).join(';'));
+  const blob = new Blob(['﻿'+lines.join('\r\n')], { type:'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `leads-instituto-hb-${todayStr().split('-').reverse().join('-')}.csv`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+  showToast('Planilha exportada.');
+}
+
+// ---------- LEAD MODAL ----------
+const FORM_KEYS = ['nomeCrianca','nomeResponsavel','contato','dataNascimento','origem','responsavelAtendimento','segmento','serieTurma','turno','anoIngresso','escolaAtual','quemDecide','motivoBusca','status','dataPrimeiroContato','dataRetorno','dataVisita','visitaStatus','dataProposta','prazoReserva','motivoPerda','observacoes'];
+window.togglePerda = function(){
+  document.getElementById('perdaField').style.display = document.getElementById('f_status').value==='perdido' ? 'block' : 'none';
+}
+window.openLeadModal = function(id){
+  editingId = id || null;
+  const lead = id ? leads.find(l=>l.id===id) : null;
+  document.getElementById('leadModalTitle').textContent = lead ? 'Editar lead' : 'Novo lead';
+  document.getElementById('deleteBtn').style.display = lead ? 'inline-block' : 'none';
+  fillEquipe(lead?.responsavelAtendimento);
+  FORM_KEYS.forEach(k=>{ document.getElementById('f_'+k).value = lead?.[k] || ''; });
+  if(!lead){ document.getElementById('f_status').value='etapa1'; document.getElementById('f_dataPrimeiroContato').value=todayStr(); }
+  if(!document.getElementById('f_status').value) document.getElementById('f_status').value='etapa1';
+  togglePerda();
+  document.getElementById('leadModalOverlay').classList.add('open');
+}
+window.closeLeadModal = function(){ document.getElementById('leadModalOverlay').classList.remove('open'); editingId = null; }
+
+window.saveLead = async function(){
+  const data = {};
+  FORM_KEYS.forEach(k=>{ data[k] = document.getElementById('f_'+k).value.trim(); });
+  if(!data.nomeCrianca){ showToast('Informe o nome da criança.'); return; }
+  if(data.status!=='perdido') data.motivoPerda = '';
+  if(data.status==='perdido' && !data.motivoPerda){ showToast('Escolha o motivo de perda.'); return; }
+  data.atualizadoEm = serverTimestamp();
+  try{
+    if(editingId){ await setDoc(doc(db,'leads',editingId), data, { merge:true }); showToast('Lead atualizado.'); }
+    else{ await setDoc(doc(db,'leads','lead_'+Date.now()), data); showToast('Lead cadastrado.'); }
+    closeLeadModal();
+  }catch(e){ console.error(e); showToast('Erro ao salvar. Verifique a conexão.'); }
+}
+window.deleteLead = async function(){
+  if(!editingId) return;
+  if(!confirm('Excluir este lead? Essa ação não pode ser desfeita.')) return;
+  try{ await deleteDoc(doc(db,'leads',editingId)); closeLeadModal(); showToast('Lead excluído.'); }
+  catch(e){ console.error(e); showToast('Erro ao excluir.'); }
+}
+
+// ---------- SETTINGS MODAL ----------
+window.openSettings = function(){
+  ['diasRetorno','diasAniversario','prazoMatricula','diasPrazo','equipe'].forEach(k=>{ document.getElementById('s_'+k).value = settings[k] ?? ''; });
+  document.getElementById('settingsModalOverlay').classList.add('open');
+}
+window.closeSettings = function(){ document.getElementById('settingsModalOverlay').classList.remove('open'); }
+window.saveSettings = async function(){
+  const newSettings = {
+    diasRetorno: parseInt(document.getElementById('s_diasRetorno').value)||3,
+    diasAniversario: parseInt(document.getElementById('s_diasAniversario').value)||7,
+    prazoMatricula: document.getElementById('s_prazoMatricula').value,
+    diasPrazo: parseInt(document.getElementById('s_diasPrazo').value)||15,
+    equipe: document.getElementById('s_equipe').value.trim(),
+  };
+  try{ await setDoc(settingsDocRef, newSettings); closeSettings(); showToast('Configurações salvas.'); }
+  catch(e){ console.error(e); showToast('Erro ao salvar configurações.'); }
+}
+
+document.getElementById('loginPassword').addEventListener('keydown', e=>{ if(e.key==='Enter') window.doLoginEmail(); });
+document.querySelectorAll('.modal-overlay').forEach(ov=>{
+  ov.addEventListener('click', e=>{ if(e.target===ov) ov.classList.remove('open'); });
+});
+</script>
+</body>
+</html>
